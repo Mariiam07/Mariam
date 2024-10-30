@@ -1,6 +1,57 @@
+# customer.py
+class Customer:
+    def __init__(self, name, contact_info, account_details):
+        self.__name = name
+        self.__contact_info = contact_info
+        self.__account_details = account_details
+        self.__loyalty_discount = None
+
+    def get_name(self):
+        return self.__name
+
+    def apply_loyalty_discount(self, discount):
+        self.__loyalty_discount = discount
+
+    def get_discount(self):
+        return self.__loyalty_discount
+
+    def __str__(self):
+        return f"Customer: {self.__name}, Contact: {self.__contact_info}"
+
+# order.py
+class Order:
+    def __init__(self, order_date, invoice_details, total_amount):
+        self.__order_date = order_date
+        self.__invoice_details = invoice_details
+        self.__total_amount = total_amount
+
+    def generate_invoice(self):
+        return Invoice(self.__invoice_details, self.__total_amount)
+
+    def __str__(self):
+        return f"Order Date: {self.__order_date}, Total: {self.__total_amount}"
+
+# invoice.py
+class Invoice:
+    def __init__(self, invoice_details, total_amount):
+        self.__invoice_details = invoice_details
+        self.__total_amount = total_amount
+        self.__discounts = []
+
+    def add_discount(self, discount):
+        self.__discounts.append(discount)
+
+    def calculate_final_amount(self):
+        final_amount = self.__total_amount
+        for discount in self.__discounts:
+            final_amount -= discount
+        return final_amount
+
+    def __str__(self):
+        return f"Invoice: {self.__invoice_details}, Final Amount: {self.calculate_final_amount()}"
+
+# ebook.py
 class EBook:
-    """Class to represent an e-book."""
-    
     def __init__(self, title, author, publication_date, genre, price):
         self.__title = title
         self.__author = author
@@ -8,120 +59,68 @@ class EBook:
         self.__genre = genre
         self.__price = price
 
-    # Getter methods
-    def get_title(self):
-        return self.__title
-
-    def get_author(self):
-        return self.__author
-
     def get_price(self):
         return self.__price
 
-    # __str__ 
     def __str__(self):
-        return f"{self.__title} by {self.__author}, Price: ${self.__price:.2f}"
+        return f"EBook: {self.__title}, Author: {self.__author}, Price: {self.__price}"
 
-    
-class Customer:
-    """Class to represent a customer."""
-    
-    def __init__(self, name, contact_info):
-        self.__name = name
-        self.__contact_info = contact_info
-
-    # Getter method
-    def get_name(self):
-        return self.__name
-
-    # __str__ 
-    def __str__(self):
-        return f"Customer: {self.__name}, Contact: {self.__contact_info}"
-
-    
+# shopping_cart.py
 class ShoppingCart:
-    """Class to represent a shopping cart."""
-    
     def __init__(self):
         self.__items = []
+        self.__total_price = 0
 
-    # Add item to cart
-    def add_item(self, ebook):
+    def add_ebook(self, ebook):
         self.__items.append(ebook)
+        self.__total_price += ebook.get_price()
 
-    # Remove item from cart
-    def remove_item(self, ebook):
-        self.__items.remove(ebook)
+    def remove_ebook(self, ebook):
+        if ebook in self.__items:
+            self.__items.remove(ebook)
+            self.__total_price -= ebook.get_price()
 
-    # Get all items in cart
-    def get_items(self):
-        return self.__items
+    def get_total_price(self):
+        return self.__total_price
 
-    # __str__ 
     def __str__(self):
-        return "Shopping Cart: " + ", ".join(str(item) for item in self.__items)
+        return f"Cart: {len(self.__items)} items, Total Price: {self.__total_price}"
 
-    
-class Order:
-    """Class to represent an order."""
-    
-    def __init__(self, customer, items):
-        self.__customer = customer
-        self.__items = items
+# loyalty_discount.py
+class LoyaltyDiscount:
+    def __init__(self, discount_type, amount):
+        self.__discount_type = discount_type
+        self.__amount = amount
 
-    # Get customer
-    def get_customer(self):
-        return self.__customer
+    def apply_discount(self, total):
+        return total - self.__amount
 
-    # Get items
-    def get_items(self):
-        return self.__items
-
-    # __str__ 
     def __str__(self):
-        return f"Order for {self.__customer.get_name()}: {', '.join(str(item) for item in self.__items)}"
+        return f"Loyalty Discount: {self.__discount_type}, Amount: {self.__amount}"
 
 
-class Invoice:
-    """Class to represent an invoice."""
-    
-    def __init__(self, order, discount=0):
-        self.__order = order
-        self.__discounts = discount  # Discounts applied
-        self.__vat_rate = 0.08  # VAT fixed rate of 8%
+# Create a customer
+customer1 = Customer("Mariam Almansoori", "Mariamm09@icloud.com", "Loyalty")
+print(customer1)
 
-    # Calculate total price including VAT and discount
-    def calculate_total(self):
-        total = sum(item.get_price() for item in self.__order.get_items())
-        total -= self.__discounts
-        total += total * self.__vat_rate
-        return total
+# Create eBooks
+ebook1 = EBook("Book One", "Author A", "2020", "Fiction", 20.0)
+ebook2 = EBook("Book Two", "Author B", "2021", "Non-Fiction", 15.0)
 
-    # __str__ 
-    def __str__(self):
-        return (f"Invoice:\nCustomer: {self.__order.get_customer().get_name()}\n"
-                f"Items: {', '.join(item.get_title() for item in self.__order.get_items())}\n"
-                f"Discounts Applied: ${self.__discounts:.2f}\n"
-                f"Total Amount (with VAT): ${self.calculate_total():.2f}")
+# Add eBooks to shopping cart
+cart = ShoppingCart()
+cart.add_ebook(ebook1)
+cart.add_ebook(ebook2)
+print(cart)
 
+# Place an order
+order = Order("2024-10-30", "Order for Mariam", cart.get_total_price())
+invoice = order.generate_invoice()
 
-# OUTPUT
-if __name__ == "__main__":
-    # Create e-books
-    ebook1 = EBook("Python Programming", "Mariam Mubarak", "2022-11-21", "Programming", 29.99)
-    ebook2 = EBook("Data Science Essentials", "Reem Munthir", "2022-12-15", "Data Science", 39.99)
+# Apply a loyalty discount
+discount = LoyaltyDiscount("Loyalty Member", 5.0)
+customer1.apply_loyalty_discount(discount)
+invoice.add_discount(customer1.get_discount().apply_discount(invoice.calculate_final_amount()))
 
-    # Create a customer
-    customer = Customer("Maitha", "Maithaaa090@icloud.com")
-
-    # Create a shopping cart and add e-books
-    cart = ShoppingCart()
-    cart.add_item(ebook1)
-    cart.add_item(ebook2)
-
-    # Create an order
-    order = Order(customer, cart.get_items())
-
-    # Generate an invoice with a $5 discount
-    invoice = Invoice(order, discount=5.00)
-    print(invoice)
+# Display the invoice with the discount applied
+print(invoice)
