@@ -104,8 +104,8 @@ customer1 = Customer("Mariam Almansoori", "Mariamm09@icloud.com", "Loyalty")
 print(customer1)
 
 # Create eBooks
-ebook1 = EBook("Book One", "Author A", "2020", "Fiction", 20.0)
-ebook2 = EBook("Book Two", "Author B", "2021", "Non-Fiction", 15.0)
+ebook1 = EBook("Atomic Habits", "James Clear", "2018", "self help book", 20.0)
+ebook2 = EBook("The Poppy War", "R.F. KUANG", "2018", "historical military fantasy", 15.0)
 
 # Add eBooks to shopping cart
 cart = ShoppingCart()
