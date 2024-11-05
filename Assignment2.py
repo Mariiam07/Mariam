@@ -1,138 +1,105 @@
-# customer.py
 class Customer:
-    def __init__(self, name, contact_info, account_details):
-        # Initialize a customer with their name, contact info, and account details (like loyalty membership)
-        self.__name = name
-        self.__contact_info = contact_info
-        self.__loyalty_member = loyalty_member
-        # Set loyalty discount to 10% if the customer is part of the loyalty program, else 0%
-        self.__loyalty_discount = 0.10 if account_details == "Loyalty" else 0
+    def __init__(self, name, contact_info, loyalty_member):
+        self.__name = name  # Customer's name
+        self.__contact_info = contact_info  # Customer's contact information
+        self.__loyalty_member = loyalty_member  # Boolean indicating loyalty membership status
+        self.__loyalty_discount = 0.10 if loyalty_member else 0  # Loyalty discount
 
     def get_name(self):
-        # Get the customer's name
-        return self.__name
+        return self.__name  # Method to return the customer's name
 
-    def get_loyalty_discount(self):
-        # Return the loyalty discount percentage (if applicable)
-        return self.__loyalty_discount
+    def apply_loyalty_discount(self, total):
+        # Method to apply loyalty discount to a given total
+        if self.__loyalty_member:
+            return total * self.__loyalty_discount
+        return 0
 
-    def __str__(self):
-        # String representation of the customer (for easy printing)
-        return f"Customer: {self.__name}, Contact: {self.__contact_info}"
 
-# ebook.py
 class EBook:
     def __init__(self, title, author, publication_date, genre, price):
-        # Initialize an eBook with title, author, publication date, genre, and price
-        self.__title = title
-        self.__author = author
-        self.__publication_date = publication_date
-        self.__genre = genre
-        self.__price = price
+        self.__title = title  # Title of the eBook
+        self.__author = author  # Author of the eBook
+        self.__publication_date = publication_date  # Publication date of the eBook
+        self.__genre = genre  # Genre of the eBook
+        self.__price = price  # Price of the eBook
 
     def get_price(self):
-        # Get the price of the eBook
-        return self.__price
+        return self.__price  # Method to return the price of the eBook
 
-    def __str__(self):
-        # String representation of the eBook (for easy printing)
-        return f"EBook: {self.__title}, Author: {self.__author}, Price: {self.__price}"
 
-# shopping_cart.py
 class ShoppingCart:
     def __init__(self):
-        # Initialize an empty shopping cart
-        self.__items = []
+        self.__items = []  # A collection (list) of EBook objects
 
     def add_ebook(self, ebook):
-        # Add an eBook to the shopping cart
-        self.__items.append(ebook)
+        self.__items.append(ebook)  # Method to add an eBook to the cart
 
     def remove_ebook(self, ebook):
-        # Remove an eBook from the shopping cart if it exists in the cart
         if ebook in self.__items:
-            self.__items.remove(ebook)
+            self.__items.remove(ebook)  # Method to remove an eBook from the cart
 
     def get_total_price(self):
-        # Calculate the total price of all eBooks in the cart
-        total_price = sum(ebook.get_price() for ebook in self.__items)
-        return total_price
+        return sum(ebook.get_price() for ebook in self.__items)  # Method to get the total price of all eBooks
+
+    def apply_bulk_discount(self):
+        # Logic for applying a bulk discount could be implemented here
+        pass
 
     def get_items_count(self):
-        # Return the number of items (eBooks) in the cart
-        return len(self.__items)
+        return len(self.__items)  # Method to return the number of items in the cart
 
-    def __str__(self):
-        # String representation of the shopping cart (for easy printing)
-        return f"Cart: {len(self.__items)} items, Total Price: {self.get_total_price()}"
 
-# order.py
 class Order:
     def __init__(self, customer, shopping_cart, order_date):
-        # Initialize an order with a customer, their shopping cart, and the order date
-        self.__customer = customer
-        self.__shopping_cart = shopping_cart
-        self.__order_date = order_date
-        self.__invoice = None
+        self.__customer = customer  # Composition: An order cannot exist without a customer
+        self.__shopping_cart = shopping_cart  # Composition: An order is tightly coupled with its shopping cart
+        self.__order_date = order_date  # Date of the order
 
     def generate_invoice(self):
-        # Generate an invoice based on the customer's order
-        self.__invoice = Invoice(self.__customer, self.__shopping_cart)
-        return self.__invoice
+        # Method to generate an invoice based on the customer's order
+        return Invoice(self.__customer, self.__shopping_cart)  # Create and return an invoice
 
-    def __str__(self):
-        # String representation of the order (for easy printing)
-        return f"Order Date: {self.__order_date}, Total: {self.__shopping_cart.get_total_price()}"
 
-# invoice.py
 class Invoice:
     VAT_RATE = 0.08  # A fixed VAT rate of 8%
 
     def __init__(self, customer, shopping_cart):
-        # Initialize an invoice with customer and shopping cart details
-        self.__customer = customer
-        self.__shopping_cart = shopping_cart
-        self.__discounts = []  # List of discounts to apply
-        self.__final_amount = self.calculate_final_amount()  # Calculate the final amount right away
-
-    def apply_loyalty_discount(self):
-        # Calculate and apply loyalty discount (if applicable) to the total price
-        loyalty_discount = self.__shopping_cart.get_total_price() * self.__customer.get_loyalty_discount()
-        self.__discounts.append(loyalty_discount)
-
-    def apply_bulk_discount(self):
-        # Apply a bulk discount of 20% if the customer buys 5 or more eBooks
-        if self.__shopping_cart.get_items_count() >= 5:
-            bulk_discount = self.__shopping_cart.get_total_price() * 0.20
-            self.__discounts.append(bulk_discount)
+        self.__customer = customer  # Customer for whom the invoice is generated
+        self.__shopping_cart = shopping_cart  # Shopping cart associated with the invoice
+        self.__discounts = []  # Discounts applied to the invoice
+        self.__final_amount = self.calculate_final_amount()  # Total amount after discounts and VAT
 
     def calculate_final_amount(self):
-        # Calculate the final amount after applying all discounts and VAT
-        total_amount = self.__shopping_cart.get_total_price()  # Start with total price
-        self.apply_loyalty_discount()  # Apply loyalty discount if eligible
-        self.apply_bulk_discount()  # Apply bulk discount if eligible
+        # Method to calculate the final amount after applying discounts and VAT
+        total_amount = self.__shopping_cart.get_total_price()  # Get total price from shopping cart
+        loyalty_discount = self.__customer.apply_loyalty_discount(total_amount)  # Apply loyalty discount
+        self.__discounts.append(loyalty_discount)  # Add loyalty discount to discounts
+        bulk_discount = self.apply_bulk_discount()  # Apply bulk discount
+        self.__discounts.append(bulk_discount)  # Add bulk discount to discounts
+
         discount_total = sum(self.__discounts)  # Sum all discounts
         total_after_discount = total_amount - discount_total  # Apply discounts to total amount
         vat = total_after_discount * Invoice.VAT_RATE  # Calculate VAT on the discounted total
         return total_after_discount + vat  # Return the total price with VAT included
 
-    def __str__(self):
-        # String representation of the invoice (for easy printing)
-        return f"Invoice for {self.__customer.get_name()} - Final Amount: {self.__final_amount:.2f}"
+    def apply_bulk_discount(self):
+        # Apply a bulk discount of 20% if the customer buys 5 or more eBooks
+        if self.__shopping_cart.get_items_count() >= 5:
+            return self.__shopping_cart.get_total_price() * 0.20
+        return 0  # No bulk discount
 
-# Example usage
-customer1 = Customer("Mariam Almansoori", "Mariamm09@icloud.com", "Loyalty")
 
-# Create a few eBooks
-ebook1 = EBook("Atomic Habits", "James Clear", "2018", "self help book", 20.0)
-ebook2 = EBook("The Poppy War", "R.F. Kuang", "2018", "historical military fantasy", 15.0)
+# Customer Me :)
+customer1 = Customer("Mariam Almansoori", "Mariamm09@icloud.com", True)
 
+# My favourite eBooks
+ebook1 = EBook("Atomic Habits", "James Clear", "2018", "Self-help", 20.0)
+ebook2 = EBook("The Poppy War", "R.F. Kuang", "2018", "Historical Military Fantasy", 15.0)
 
 # Add eBooks to the shopping cart
 cart = ShoppingCart()
 cart.add_ebook(ebook1)
 cart.add_ebook(ebook2)
-
 
 # Create an order with the customer and shopping cart
 order = Order(customer1, cart, "2024-10-30")
@@ -140,5 +107,5 @@ order = Order(customer1, cart, "2024-10-30")
 # Generate an invoice for the order
 invoice = order.generate_invoice()
 
-# Display the invoice with loyalty and bulk discounts applied
-print(invoice)
+# Display the final amount on the invoice
+print(f"Invoice for {invoice._Invoice__customer.get_name()} - Final Amount: {invoice.calculate_final_amount():.2f}")
